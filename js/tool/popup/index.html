@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>openlayers-popup</title>
+    <link rel="stylesheet" href="../../ol_v4.6.5/ol.css" type="text/css">
+     <link rel="stylesheet" href="popup.css" type="text/css">
+    <style>
+      .map {
+        height: 500px;
+        width: 100%;
+      }
+    </style>
+    <script src="../../ol_v4.6.5/ol.js" type="text/javascript"></script> 
+    <script src="popup.js" type="text/javascript"></script> 
+</head>
+<body>
+ <h2>openlayers  popup 工具封装测试  </h2>
+ 	
+    <div id="map" class="map"></div> 
+   
+ <h2>刘玉峰 jjxliu306@163.com</h2>
+
+    <script type="text/javascript">
+     
+  var osm = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+    	 
+    
+      var map = new ol.Map({
+        target: 'map',
+        layers:[osm],
+        view: new ol.View({
+          center: [ 120, 30],
+          zoom: 10,
+          projection: 'EPSG:4326'
+        })
+      });
+       
+      
+      //封装起来了 直接这样调用即可
+      var popup = new Popup(map); 
+      //下面对鼠标点击时间进行监听
+       map.on('click', function(evt) {
+    	   var position = map.getEventCoordinate(evt.originalEvent); 
+    	   popup.tooltip(position , position);
+      });
+       
+    </script> 
+     </body>
+</html>

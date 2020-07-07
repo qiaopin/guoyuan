@@ -1,0 +1,230 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<HEAD>
+    <TITLE> JS解析读取SHP文件 </TITLE>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../ol_v4.6.5/ol.css"/>
+    <link rel="stylesheet" type="text/css" href="../popup/popup.css"/>
+
+    <script src="./js/shapefile.min.js"></script>
+    <script src="../../ol_v4.6.5/ol.js"></script>
+    <script src="../popup/popup.js"></script>
+</HEAD>
+
+
+<style>
+
+    .map {
+        height: 500px;
+        width: 100%;
+    }
+
+    .head {
+        height: 80px;
+        width: 100%;
+    }
+
+</style>
+
+<BODY>
+<h2>openlayers shapefile 通过Html5读取本地文件并加载到地图。注意demo采用4326坐标系</h2>
+
+<div class="head">
+    SHP: <input type="file" id="shpFile"> <br>
+    DBF: <input type="file" id="dbfFile"> <br>
+    <!--  PRJ: <input type="file" id="prjFile">  <br> -->
+    <input type="button" value="Parse" onclick="doParseShp()">
+</div>
+
+<div id="map" class="map"></div>
+
+<script>
+    var encoding = "GBK";// UTF-8
+    var shpData, dbfData;
+    var map;
+    var fLayer;
+    var loadStatus = false;
+
+
+    //初始化地图
+    var osm = new ol.layer.Tile({
+        source: new ol.source.OSM()
+    });
+    fLayer = new ol.layer.Vector({
+        source: new ol.source.Vector()
+    });
+
+    map = new ol.Map({
+        target: 'map',
+        layers: [osm, fLayer],
+        view: new ol.View({
+            center: [115.6, 37.6],
+            zoom: 10,
+            projection: 'EPSG:4326'
+        }),
+        controls: [new ol.control.MousePosition()]
+    });
+
+    //弹出dialog封装
+    var popup = new Popup(map);
+
+    //map 监听点击事件
+    map.on('click', function (evt) {
+        if (evt.dragging) {
+            return;
+        }
+        var pixel = map.getEventPixel(evt.originalEvent);
+
+        var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+            return feature;
+        });//查询方式有很多
+
+        if (feature) {
+
+            var str = '<table style="background: white;color: black;z-index: 1000000; font-size: 12px;">';
+            var f_properties = feature.getProperties();
+            for (var key in f_properties) {
+                str += '<tr>' +
+                    '<td style="width:80px;">' + key + '&nbsp;:&nbsp; </td>' +
+                    '<td> ' + f_properties[key] + '</td>' +
+                    '</tr>';
+            }
+            str += '</table>';
+
+            var position = map.getEventCoordinate(evt.originalEvent);
+            popup.tooltip(str, position);
+        } else {
+            popup.tooltip(null, null);
+        }
+    });
+
+
+    function doParseShp() {
+        shpData = null;
+        dbfData = null;
+        loadStatus = false;
+        popup.tooltip(null, null);
+
+        var shpFile = document.getElementById("shpFile").files[0];
+        var dbfFile = document.getElementById("dbfFile").files[0];
+
+        // var maxNum = document.getElementById('maxNum').value;
+        var maxNum = 111111111111111111;
+        if (!maxNum) {
+            alert('最大展示条数不能为空');
+            return;
+        }
+        if (!shpFile) {
+            alert('shp文件不能为空');
+            return;
+        }
+        if (!dbfFile) {
+            alert('DBF文件不能为空');
+            return;
+        }
+
+
+        //通过HTML5 读取本地文件数据流
+        var readDbf = new FileReader();
+        readDbf.readAsArrayBuffer(dbfFile, encoding);//读取文件的内容
+
+        var readShp = new FileReader();
+        readShp.readAsArrayBuffer(shpFile, encoding);//读取文件的内容
+
+        //SHP
+        readShp.onload = function () {
+            shpData = this.result;
+            loadData(parseInt(maxNum));
+        };
+        //DBF
+        readDbf.onload = function () {
+            dbfData = this.result;
+            loadData(parseInt(maxNum));
+        }
+
+
+    }
+
+
+    function loadData(maxNum) {
+
+        if (!dbfData || !shpData || loadStatus) return;
+
+        loadStatus = true;
+
+        //var shapefile = new shapefile();
+        var features = [];
+        var index = 0;
+        shapefile.open(shpData, dbfData, {encoding: encoding}).then(source => source.read().then(
+            function next(result) {
+                if (result.done || maxNum == index) {
+                    layerReloadFeatures(features);
+                    return;
+                }
+
+                var geometry = result.value.geometry;
+                var propreties = result.value.properties;
+
+                var f = createFeature(geometry, propreties);
+                if (f) {
+                    features.push(f);
+                }
+                index++;
+                return source.read().then(next);
+            }
+        ))
+    }
+
+
+    function layerReloadFeatures(features) {
+
+        fLayer.getSource().clear();
+        fLayer.getSource().addFeatures(features);
+
+        var extent = fLayer.getSource().getExtent();
+        //console.log('extent : ' + extent);
+        if (extent) {
+            map.getView().fit(extent, map.getSize());
+            //map.getView().set('extent' ,extent );
+        }
+    }
+
+    /**
+     * 根据shp解析出来的数据创建一个ol4 的feature
+     */
+    function createFeature(geometry, properties) {
+
+        var type = geometry.type;
+        var geom;
+
+        if (type == 'Polygon') {
+            geom = new ol.geom.Polygon(geometry.coordinates);
+        } else if (type == 'Point') {
+            geom = new ol.geom.Point(geometry.coordinates);
+        } else if (type == 'LineString') {
+            geom = new ol.geom.LineString(geometry.coordinates);
+        } else if (type == 'MultiPolygon') {
+            geom = new ol.geom.MultiPolygon(geometry.coordinates);
+        } else if (type == 'MultiPoint') {
+            geom = new ol.geom.MultiPoint(geometry.coordinates);
+        } else if (type == 'MultiLineString') {
+            geom = new ol.geom.MultiLineString(geometry.coordinates);
+        }
+
+        if (!geom) return null;
+        var feature = new ol.Feature({
+            geometry: geom
+        });
+
+        //属性
+        for (var key in properties) {
+            feature.set(key, properties[key]);
+        }
+
+        return feature;
+    }
+</script>
+</BODY>
+
+</HTML>

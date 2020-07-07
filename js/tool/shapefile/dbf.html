@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<HEAD>
+<meta charset="UTF-8">
+    <TITLE> JS解析读取DBF文件 </TITLE>  
+    <script src="./js/shapefile.min.js" ></script> 
+ 
+</HEAD>
+
+
+<style>
+
+    .table{
+        height: 500px;
+        width: 100%;
+    }
+
+    .head{
+        height: 80px;
+        width: 100%;
+    }
+    td{ 
+        text-align:center; 
+    }
+
+</style>
+
+<BODY>
+<h2>  shapefile  通过Html5读取本地gis文件中的DBF属性数据库文件,并列表展示</h2>
+<h2>
+    刘玉峰 jjxliu306@163.com</h2>
+    <div class="head">
+         
+         DBF:  <input type="file" id="dbfFile" accept="">   最大展示条数:<input type="text" id='maxNum' value="100">
+   
+
+         <input type="button" value="Parse" onclick="doParseDbf()">
+    </div>
+
+    <div id="table" class="table"></div>
+
+    <script>
+ 
+        function doParseDbf() {
+            
+            var dbfFile = document.getElementById("dbfFile").files[0];
+            if(!dbfFile){
+                alert('DBF文件不能为空');
+                return ;
+            } 
+
+            var maxNum = document.getElementById('maxNum').value;
+            if(!maxNum){
+                alert('最大展示条数不能为空');
+                return ;
+            }
+
+            
+                //通过HTML5 读取本地文件数据流
+            var readDbf = new FileReader();
+            readDbf.readAsArrayBuffer(dbfFile, 'UTF-8');//读取文件的内容
+
+              
+                 //DBF
+            readDbf.onload = function () {
+                dbfData = this.result;
+                loadData(dbfData , parseInt(maxNum));
+            }
+
+        }
+    
+
+        function loadData(dbfData , maxNum) {
+            
+            if(!dbfData){
+                alert('读取数据为空');
+                return;
+            } 
+ 
+            var table_context_html = '' ;
+            var header_columns = [] ;
+            var header_html = '' ;
+
+ 
+            var index = 0;
+            shapefile.openDbf(dbfData , { encoding:'utf-8'}).then(source => source.read().then(
+                function next(result) {
+
+                    if (result.done || index == maxNum ) {
+                         
+                        //组装html
+                        var _html = '<table>' + header_html + table_context_html + '</table>' ;
+                        //填充
+                        document.getElementById('table').innerHTML = _html;
+
+                        return;
+                    }
+                    var value = result.value;
+                  //  console.log(value);
+                    //表头
+                    if(!header_columns || header_columns.length == 0) { 
+                        header_html = '<tr>';
+                        for (var key in value) {
+                           header_columns.push(key);
+                           header_html += '<td >' + key + '</td>';
+                        } 
+                        header_html += '</tr>';
+
+
+                        console.log(header_columns);
+                    }
+
+                    //表内容
+                    table_context_html += '<tr>';
+                    for(var i in header_columns){
+                        var td_value = value[header_columns[i]];
+                        //console.log(key + ',' + value[key]);
+                        table_context_html += '<td>' + td_value  + '</td>';
+                    }
+                    table_context_html += '</tr>';
+ 
+
+                    index++ ;
+                    
+                    return source.read().then(next);
+                }
+
+            ))
+        }
+
+
+       
+
+    </script>
+
+
+</BODY>
+
+</HTML>

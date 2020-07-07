@@ -1,0 +1,108 @@
+.layui-layer-setwin .layui-layer-close1 {
+    background-position: -80px -40px !important;
+}
+
+/*弹出层小白叉*/
+.layui-layer-setwin .layui-layer-max {
+    background-position: -95px -40px !important;
+}
+
+.layui-layer-setwin .layui-layer-min cite {
+    background: #fff !important;
+}
+
+.layui-table, .layui-table-view {
+    margin: 0px;
+}
+
+/*表格margin-top为0*/
+[lay-skin=primary].layui-form-checked i {
+    border-color: #187FCC;
+    background: #187FCC;
+}
+
+/*表格多选框颜色*/
+.layui-form-radio > i:hover, .layui-form-radioed > i {
+    color: #187fcc;
+}
+
+/*表格单选框颜色*/
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background: #177BD0;
+}
+
+/*表格分页颜色*/
+.layui-table-tool {
+    background: #FFFFFF;
+}
+
+/*表格头部工具条背景颜色*/
+/*.layui-table tbody tr:hover{background: rgba(0,0,0,0)!important;}/*表格鼠标行背景颜色*/
+
+.layui-table, .layui-table-view {
+    margin: 0px;
+    border: none;
+}
+
+.layui-table-view .layui-table td, .layui-table-view .layui-table th {
+    border-left: 1px solid #e6e6e6;
+    padding: 5px 0px;
+}
+
+.layui-table-view .layui-table th {
+    text-align: center;
+}
+
+.layui-table-page, .layui-table-total {
+    border-width: 1px 1px 0px;
+}
+
+.layui-table-body {
+    margin-bottom: 0px;
+    margin-right: 0px;
+}
+
+/*.layui-table-cell{padding: 0px 10px;}*/
+
+/*通用样式*/
+.table-content .layui-table, .layui-table-view {
+    margin: 0px;
+    border-left: none;
+}
+
+.layui-form-radio > i:hover, .layui-form-radioed > i {
+    color: #187FCC;
+}
+
+[lay-skin=primary].layui-form-checked i {
+    border-color: #187FCC;
+    background: #187FCC;
+}
+
+.layui-form-checked span, .layui-form-checked:hover span {
+    background: #187FCC;
+}
+
+.layui-layer {
+    color: #000;
+}
+
+.black .layui-laypage-limits select {
+    background-color: #fff;
+    color: #333;
+}
+
+.layui-table-tool .layui-btn .layui-icon {
+    margin-left: -6px;
+    margin-right: 2px;
+}
+
+.layui-form-select dl dd.layui-this {
+    background: #347CA9;
+}
+
+.editBox {
+    position: absolute;
+    top: 1px;
+    left: 80px;
+}

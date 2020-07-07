@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="../../js/layui/css/layui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../js/ol/ol.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/homepage.css"/>
+    <link rel="stylesheet" type="text/css" href="../../js/tool/popup/popup.css"/>
+    <style>
+        .featureInfoTable {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            width: 100%;
+        }
+
+        .featureInfoTable td {
+            border-left: 1px solid #000;
+            border-top: 1px solid #000;
+            color: #333;
+            padding: 2px 5px;
+        }
+
+        .featureInfoTable tr td:first-child, .featureInfoTable td.active {
+            color: #fff;
+            /*background: rgba(0, 0, 0, 0.5);*/
+            background: rgba(67, 132, 219, 0.8);
+        }
+
+        .ol-popup {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        #popup_content .layui-input {
+            /*background: transparent;*/
+            /*border-color: #000;*/
+            background: rgba(67, 132, 219, 0.8);
+            color: #fff;
+        }
+
+        .layui-form-select .layui-edge {
+            border-top-color: #fff;
+        }
+
+        .searchBox {
+            position: absolute;
+            top: 12px;
+            left: 207px;
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .searchBox .layui-form-select .layui-edge {
+            border-top-color: #000;
+        }
+    </style>
+</head>
+
+<body class="white">
+<div class="left">
+    <form class="layui-form mapLayerBox" action="">
+        <!--图层管理-->
+    </form>
+</div>
+<div class="right">
+    <div id="map"></div>
+    <div class="searchBox">
+        <form class="layui-form" action="">
+            <div class="layui-inline">
+                <!--<label class="layui-form-label">选择图层</label>-->
+                <div class="layui-input-inline">
+                    <select name="" id="searchLayer">
+                        <!--<option value="1">国有</option>-->
+                        <!--<option value="2">集体</option>-->
+                        <!--<option value="3">房屋</option>-->
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <!--<label class="layui-form-label">ID</label>-->
+                <div class="layui-input-inline">
+                    <input type="text" id="FID" name="FID" placeholder="ID" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <div id="search" class="layui-btn layui-btn-normal" lay-submit lay-filter="search">
+                    <i class="layui-icon">&#xe615;</i>查询
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="maptool">
+        <ul class="tool-bar">
+            <li id="" title="收藏" style="display: none;"><a href="javascript:" class="tool-case1"></a></li>
+            <li title="全幅" onclick="maptool.allover()" style="display: none;"><a href="javascript:"
+                                                                                 class="tool-case9"></a></li>
+            <li title="全屏" class="" style="display: none;"><a href="javascript:" class="tool-case7"></a></li>
+            <li title="测距" onclick="maptool.measure('distance')"><a href="javascript:" class="tool-case3"></a></li>
+            <li title="测面" onclick="maptool.measure('area')"><a href="javascript:" class="tool-case4"></a></li>
+            <li title="清除" onclick="maptool.clear()"><a href="javascript:" class="tool-case6"></a></li>
+            <li id="query" title="查询"><a href="javascript:" class="tool-case5"></a></li>
+            <!--<li title="全屏"><a href="javascript:;" class="tool-case7"></a></li>-->
+        </ul>
+    </div>
+    <div class="maptab">
+        <ul>
+            <li class="active"
+                style="background:url(../../images/maptab/ditu.jpg) no-repeat 2px 2px;background-size: 45px 45px;">
+                <a type='sl' href="javascript:">矢量</a></li>
+            <li style="background:url(../../images/maptab/yingxiang.jpg) no-repeat 2px 2px;background-size: 45px 45px;">
+                <a type='yx' href="javascript:">影像</a></li>
+            <li style="background:#fff;"><a type='fff' href="javascript:">纯白</a></li>
+            <li style="background:#000;"><a type='000' href="javascript:">纯黑</a></li>
+        </ul>
+    </div>
+</div>
+</body>
+<script src="../../js/ol/ol.js"></script>
+<script src="../../js/ol/maptool.js"></script>
+<script src="../../js/tool/popup/popup.js"></script>
+<script src="../../js/layui/layui.js"></script>
+<script src="../../js/modules/layui-config.js"></script>
+<script src="homepage.js"></script>
+<script>
+    var ljfBase = null;
+    var slider = null;
+    var form = null;
+    var layerManager = null;
+    var _mapObject = null;
+    var _mapView = null;
+    var _wktParser = null;
+    var activationClick = "query";
+    var resFeaturesTab = [];//查询到的点击位置的所有元素
+    layui.use(['form', 'jquery', 'element', 'laydate', 'table', 'slider', 'ljfBase', 'serverCenter', 'LayerManager', 'bluebird'], function () {
+        var $ = window.$ = layui.jquery;
+        $("body").attr('class', $("body", parent.document).attr('class'));
+        form = layui.form;
+        slider = layui.slider;
+        ljfBase = layui.ljfBase;
+
+        var init = function () {
+            var LayerManager = layui.LayerManager;
+            // var center = [116.04915, 39.7929];
+            var center = [116.3897202, 39.84941229];
+            layerManager = new LayerManager("map", center, 16);
+            _mapObject = layerManager._mapObject;
+            _mapView = _mapObject.getView();
+            _wktParser = new ol.format.WKT();
+
+            //加载所有底图
+            layerManager.loadMapArr(ljfBase.baseMapArr);
+            //默认加载矢量图层
+            ljfBase.changeBaseMap("sl");
+
+            maptool.init(layerManager);
+            popup = new Popup(_mapObject);
+
+            initLeftMapLayers();
+        }();
+
+        function initLeftMapLayers() {
+            //初始化图层管理
+            var leftStr = "";
+            var searchStr = "";
+            $.each(mapArr, function (i, v) {
+                layerManager.addLayer(v);
+                leftStr += '<div class="layui-form-item">' +
+                    '<label class="layui-form-label">' + v.layerName + '</label>' +
+                    '<div class="layui-input-block">' +
+                    '   <input type="checkbox" lay-filter="switch" value="' + v.layerId + '" name="switch" lay-text="开|关" lay-skin="switch" checked>' +
+                    '</div>' +
+                    '</div>';
+
+                searchStr += ' <option value="' + v.mapUrl + "/" + v.layers + '">' + v.layerName + '</option>';
+            });
+            $(".mapLayerBox").html(leftStr);
+            $("#searchLayer").html(searchStr);
+            form.render();
+        }
+
+        //监听图层开关
+        form.on('switch(switch)', function (data) {
+			// console.log(data);
+            var layerId = data.value;
+            layerManager.setVisible(layerId, data.elem.checked);
+        });
+
+        //切换底图
+        $('.maptab ul li').click(function () {
+            $('.maptab ul li').removeClass("active");
+            $(this).addClass("active");
+            var type = $(this).find('a').attr('type');
+            if (type == "sl" || type == "yx") {
+                ljfBase.changeBaseMap(type);
+            } else {
+                ljfBase.changeBaseMap("");
+                $("#map").attr("style", "background:#" + type);
+            }
+        });
+
+        $("#query").click(function () {
+            activationClick = "query";
+        });
+
+        //判断所有图层是否有点击点附近的元素
+        function getClickInfoByBbox(bbox) {
+            var resTab = [];//查询返回结果
+
+            $.each(mapArr, function (i, v) {
+				console.log(v);
+                //判断当前图层是否打开 隐藏的图层不显示信息
+                if (!layerManager.getLayerById(v.layerId).visible) {
+                    return true;//跳过本次循环
+                }
+
+                //不显示村界图层信息
+                if (v.layerName == "村界") {
+                    return true;//跳过本次循环
+                }
+
+                var mapUrl = v.mapUrl + "/" + v.layers + "/query";
+                var data = {
+                    f: "json",
+                    outFields: "*",
+                    where: "1=1",
+                    returnGeometry: true,
+                    esriGeometryEnvelope: "",
+                    geometry: bbox
+                };
+
+                $.ajax({
+                    type: 'get',
+                    async: false,
+                    url: mapUrl,
+                    data: data,
+                    success: function (xml) {
+						// console.log(xml);
+                        var resjosn = $.parseJSON(xml);
+                        if (resjosn.features.length > 0) {
+                            var features = resjosn.features;
+                            var layerName = v.layerName;
+                            var layerId = v.layerId;
+                            resTab.push({layerName: layerName, features: features, layerId: layerId});
+                        }
+                    },
+                    error: function () {
+                        parent.alert('获取点击位置信息失败');
+                    }
+                })
+            });
+            return resTab;
+        }
+
+        function getTableStr(layerName) {//切换图层
+            var resStr = "";
+            $.each(resFeaturesTab, function (i, v) {
+                if (v.layerName == layerName) {
+                    var feature = v.features[0];
+                    //   //画出面并且高亮显示
+                    lightPolygon(_mapObject, feature.geometry);
+
+                    for (var f in feature["attributes"]) {
+                        //判断哪儿个字段需要显示
+                        for (var m = 0; m < ZNToCNForm.length; m++) {
+                            var znTocn = ZNToCNForm[m];
+                            if (f == znTocn.zn) {
+                                var name = znTocn.cn;
+                                resStr += "<tr>" +
+                                    "<td style='min-width:80px;'>" + name + "</td>";
+                                $.each(v.features, function (s, k) {
+                                    var className = (s == 0 ? "active" : "");
+                                    resStr += "<td data-layerName='" + layerName + "' data-index='" + (s + 1) + "' class='" + className + "'>" + (k.attributes[f] || "") + "</td>";
+                                });
+                                resStr += "</tr>";
+                            }
+                        }
+                    }
+                }
+            });
+            return resStr;
+        }
+
+        function pointIsInArea(mapUrl, layers, evt) {
+            var maptype = "MapServer";
+            var coordinate = evt.coordinate;
+            var num = 0.00001;
+            var bbox = (coordinate[0] - num) + "," + (coordinate[1] - num) + "," + (coordinate[0] + num) + "," +
+                (coordinate[1] + num);
+            resFeaturesTab = getClickInfoByBbox(bbox);
+            if (resFeaturesTab.length == 0) {
+                return false;
+            } else if (resFeaturesTab.length == 0 && resFeaturesTab[0].layerName == "村界") {
+                return false;
+            } else {
+                var str = "";
+                var resSelect = "";
+                var resTable = "";
+                str += '<form class="layui-form layerInfos" action="">';
+                str += '<select name="" id="selectLayers" lay-filter="selectLayers">';
+                $.each(resFeaturesTab, function (i, v) {
+                    //判断当前图层不是村界图层
+                    if (v.layerName == "村界") {
+                        return true;
+                    }
+                    resSelect += '<option value="' + v.layerName + '">' + v.layerName + '</option>';
+                });
+                str += resSelect;
+                str += '</select>';
+                str += '<table class="featureInfoTable">';
+                str += getTableStr(resFeaturesTab[0].layerName);
+                str += '</table>';
+                str += '</form>';
+                if (str == "") {
+                    popup.tooltip(null, null);
+                } else {
+                    var position = _mapObject.getEventCoordinate(evt.originalEvent);
+                    popup.tooltip(str, position);
+                }
+                form.render();
+
+                form.on('select(selectLayers)', function (res) {
+                    var layerName = res.value;
+                    var tableStr = getTableStr(layerName);
+                    $(".featureInfoTable").html(tableStr);
+                });
+
+                $(".featureInfoTable").on("click", "td", function () {
+                    if ($(this).attr("data-index")) {
+                        $(".featureInfoTable td").removeClass("active");
+                        var index = parseInt($(this).attr("data-index")) + 1;
+                        $(".featureInfoTable tr td:nth-child(" + index + ")").addClass("active");
+                        var layerName = $(this).attr("data-layerName");
+                        $.each(resFeaturesTab, function (i, v) {
+                            if (v.layerName == layerName) {
+                                var featrue = v.features[index - 2];
+                                lightPolygon(_mapObject, featrue.geometry);
+                            }
+                        })
+                    }
+                })
+            }
+        }
+
+        //监听地图单击事件
+        _mapObject.on('singleclick', function (evt) {
+            if (!activationClick) {
+                return;
+            }
+            //判断当前点击位置在不在村界内
+            pointIsInArea(mapArr[2].mapUrl, mapArr[2].layers, evt);
+        });
+
+        $("#search").click(function () {
+            var mapUrl = $("#searchLayer").val();
+            var FID = $("#FID").val();
+            if (!FID) {
+                return false;
+            }
+            var features = getFeaturesByMapUrl(mapUrl);
+            $.each(features, function (i, v) {
+                if (v.attributes.FID == FID) {
+                    lightPolygon(_mapObject, v.geometry);
+                    var extent = ol.extent.boundingExtent(v.geometry.rings[0]); //获取一个坐标数组的边界，格式为[minx,miny,maxx,maxy]
+                    var center = ol.extent.getCenter(extent);
+                    layerManager.setCenter(center);
+                    _mapObject.getView().fit(extent, _mapObject.getSize());
+                    var room = _mapObject.getView().getZoom();
+                    if (room > 18) {
+                        layerManager.setZoom(18);
+                    }
+                }
+            })
+        });
+    });
+</script>
+
+</html>

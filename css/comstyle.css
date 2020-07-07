@@ -1,0 +1,67 @@
+/*风格黑*/
+.black header{background: linear-gradient(90deg, rgba(28, 30, 36, 1) 0%, rgba(53, 70, 88, 1) 100%);}
+.black .layui-nav-child{background: transparent;}
+.black .layui-nav-child dd a{color: #fff;}
+.black{background: #2F3044;color: #fff;}
+.black .head{border-bottom: 1px solid #5C5D6D;}
+.black .layui-btn-normal{background: #444557;}
+.black .layui-table-tool{background: #2F3044;}
+.black .layui-table-tool .layui-btn{background: #404153;}
+.black .layui-input-inline,.black .layui-input,.black .layui-textarea,.black textarea{background: #444557;border: none;color: #fff;}
+.black .layui-form-select .layui-input{background: #444557;color: #fff;border: none;}
+.black .layui-form-select dl{background: rgba(0,0,0,0.8); color: #fff;}
+.black .layui-form-select dl dd:hover{background: #347CA9;}
+.black .layui-table{color: #fff;}
+.black .layui-table td, .black .layui-table th,  .black .layui-table-fixed-r, .black .layui-table-header, .black .layui-table-page, .black .layui-table-tips-main, .black .layui-table-tool, .black .layui-table-view, .black [lay-skin=line].layui-table, .black [lay-skin=row].layui-table{border-color: #5C5D6D;}
+.black .layui-table{background: transparent;}
+.black .layui-table thead tr{background: #4E5465!important;}
+.black .layui-table  td, .black.layui-table  th{color: #fff!important;}
+.black .layui-table tbody tr:hover{background: #015B93!important;}
+.black .layui-table-click{background: #015B93!important;}
+.black .layui-laypage .layui-laypage-curr .layui-laypage-em{background: #015B93;}
+.black .layui-btn-skyblue{background: #1E9FFF;}
+.black .layui-laypage a{color: #fff;}
+.black .layui-laypage button, .black .layui-laypage input{background: transparent; color: #fff;border: 1px solid #fff;}
+.black .layui-laypage a, .black .layui-laypage span{color: #fff;background: #2F3044;}
+.black .layui-laypage-limits select{background: transparent; color: #fff;}
+.black .layui-layer-lan .layui-layer-title{background: #354658;}
+
+/*风格白*/
+.white header{background: linear-gradient(90deg, rgba(35, 38, 46, 1) 0%, rgba(1, 91, 147, 1) 100%);}
+.white .layui-nav-child{}
+.white .layui-nav-child dd a{}
+.white {background: #fff;color: #333;}
+.white .head{border-bottom: 1px solid #E6E6E6;}
+.white .layui-btn-normal{background: #177BD0;}
+.white .layui-table-tool{background: transparent;}
+.white .layui-table-tool .layui-btn{background:#177BD0;}
+.white .layui-input-inline,.white .layui-input,.white .layui-textarea,.white textarea{background: transparent;
+/*border: 1px solid #e6e6e6;*/
+}
+.white .layui-form-select dl{}
+.white .layui-form-select dl dd:hover{}
+.white .layui-table{color: #666;}
+.white .layui-table td, .white .layui-table th, .white .layui-table-fixed-r, .white .layui-table-header, .white .layui-table-page, .white .layui-table-tips-main, .white .layui-table-tool, .white .layui-table-view, .white [lay-skin=line].layui-table, .white [lay-skin=row].layui-table{border-color: #e6e6e6;}
+.white .layui-table{background: #fff;color: #666;}
+.white .layui-table thead tr{background: #f2f2f2!important;}
+/*.white .layui-table  td,.white .layui-table  th{color:#666;}*/
+/*.white .layui-table tbody tr:hover{background:#177BD0!important;color: #fff;}*/
+/*.white .layui-table-click{background:#177BD0 !important;color: #fff;}*/
+.white .layui-laypage .layui-laypage-curr .layui-laypage-em{background:#177BD0 ;}
+.white .layui-btn-skyblue{background: #1E9FFF;}
+.white .layui-laypage a{color: #333;}
+.white .layui-laypage button, .white .layui-laypage input{background: transparent; color: #333;}
+.white .layui-laypage a, .white .layui-laypage span{color: #333;}
+.white .layui-laypage-limits select{background: transparent; color: #333;}
+.white .layui-layer-lan .white .layui-layer-title{background: #354658;}
+
+/*通用样式*/
+.table-content .layui-table, .layui-table-view{margin: 0px;border-left:none ;}
+.layui-form-radio > i:hover, .layui-form-radioed > i{color: #187FCC;}
+[lay-skin=primary].layui-form-checked i{border-color:#187FCC ;background: #187FCC;}
+.layui-form-checked span, .layui-form-checked:hover span{background: #187FCC;}
+.layui-layer{ color:#000;}
+.black .layui-laypage-limits select{background-color:#fff;color:#333;}
+.layui-table-tool .layui-btn .layui-icon{margin-left: -6px;margin-right: 2px;}
+
+.layui-form-select dl dd.layui-this{background: #347CA9;}
